@@ -116,7 +116,7 @@
         function gerarSenha() {
             const nomeInput = document.getElementById('nome');
             const cpfInput = document.getElementById('cpf');
-            
+            const urlGestao = `https://SEUUSUARIO.github.io/sest-senat-gestao/Painel%20digital.html?senha=${senha}&nome=${encodeURIComponent(nomeInput.value)}&sala=${sala}&timestamp=${timestamp}`;
             if(!nomeInput.value.trim()) {
                 alert("Por favor, digite seu nome.");
                 return;
@@ -171,4 +171,5 @@
         }
     </script>
 </body>
+
 </html>
