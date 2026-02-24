@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem SEST SENAT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-900 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8">
+        <h1 class="text-3xl font-black text-center mb-8">RETIRAR SENHA</h1>
+        
+        <div class="space-y-4">
+            <input id="nome" type="text" placeholder="Seu nome completo" 
+                   class="w-full p-4 border-2 rounded-2xl">
+            
+            <input id="cpf" type="text" placeholder="Seu CPF" 
+                   class="w-full p-4 border-2 rounded-2xl">
+            
+            <select id="servico" class="w-full p-4 border-2 rounded-2xl">
+                <option value="A">Primeira Habilitação</option>
+                <option value="B">Renovação</option>
+                <option value="C">Segunda Via</option>
+            </select>
+            
+            <button onclick="gerarSenha()" 
+                    class="w-full bg-orange-500 text-white font-black py-6 rounded-2xl text-2xl">
+                EMITIR SENHA
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function gerarSenha() {
+            const nome = document.getElementById('nome').value;
+            if (!nome) {
+                alert("Digite seu nome");
+                return;
+            }
+
+            // Gera senha
+            const contador = parseInt(localStorage.getItem("contador") || "0") + 1;
+            const senha = document.getElementById('servico').value + String(contador).padStart(3, '0');
+            const sala = Math.random() < 0.5 ? "SALA 1" : "SALA 2";
+            
+            // Salva no localStorage do celular
+            localStorage.setItem("contador", contador);
+            localStorage.setItem("ultima_senha", senha);
+            localStorage.setItem("ultima_sala", sala);
+            
+            // CRIA A URL DO PAINEL COM OS DADOS
+            const urlPainel = `https://isaacfirmino.github.io/sest-senat-gestao/Painel%20digital.html?senha=${senha}&nome=${encodeURIComponent(nome)}&sala=${sala}`;
+            
+            // MOSTRA A URL (para teste)
+            alert(`SENHA GERADA: ${senha}\n\nAcesse este link no painel:\n${urlPainel}`);
+            
+            // Tenta abrir automaticamente (pode funcionar ou não)
+            window.open(urlPainel, '_blank');
+            
+            // Limpa formulário
+            document.getElementById('nome').value = "";
+            document.getElementById('cpf').value = "";
+        }
+    </script>
+</body>
+</html>
