@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        .qr-border { border: 12px solid white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .qr-border { border: 12px solid white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4">
@@ -55,18 +55,12 @@
     </div>
 
     <!-- Modal QR Code -->
-    <div id="modalQR" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center p-6 z-50 backdrop-blur-md" style="display: none;">
+    <div id="modalQR" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center p-6 z-50 backdrop-blur-md">
         <div class="bg-white p-8 rounded-[2.5rem] text-center max-w-sm w-full">
-            <div class="bg-blue-50 text-blue-700 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="smartphone" class="w-8 h-8"></i>
-            </div>
-            <h3 class="text-2xl font-black text-slate-800 mb-2">Acesse pelo Celular</h3>
-            <p class="text-slate-500 text-sm mb-8">Aponte a câmera para retirar sua senha</p>
-            
+            <h3 class="text-2xl font-black text-slate-800 mb-4">Acesse pelo Celular</h3>
             <div class="qr-border inline-block rounded-3xl mb-8 bg-white">
                 <div id="qrcode_canvas"></div>
             </div>
-            
             <button onclick="fecharModalQR()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl">
                 FECHAR
             </button>
@@ -74,7 +68,7 @@
     </div>
 
     <!-- Modal de Confirmação -->
-    <div id="modalSenha" class="fixed inset-0 bg-blue-900/95 hidden items-center justify-center p-6 z-50" style="display: none;">
+    <div id="modalSenha" class="fixed inset-0 bg-blue-900/95 hidden items-center justify-center p-6 z-50">
         <div class="bg-white p-10 rounded-[3rem] text-center max-w-sm w-full border-t-[12px] border-orange-500">
             <p class="text-slate-400 font-black uppercase tracking-[0.3em] text-xs mb-4">Sua Senha</p>
             <div id="senhaDisplay" class="text-8xl font-black text-blue-900 mb-8">---</div>
@@ -85,38 +79,40 @@
     </div>
 
     <script>
+        // Inicializa ícones
         lucide.createIcons();
 
-        // MODAL QR CODE
+        // ========== FUNÇÕES DO QR CODE ==========
         function abrirModalQR() {
             const modal = document.getElementById('modalQR');
             const qrContainer = document.getElementById('qrcode_canvas');
             
             qrContainer.innerHTML = "";
             
-            // URL DO SEU REPOSITÓRIO DO TOTEM (MUDE ISSO!)
-            const urlTotem = "https://SEUUSUARIO.github.io/sest-senat-totem/Formulario.html";
+            // Pega a URL atual (a mesma página)
+            const urlAtual = window.location.href;
             
             new QRCode(qrContainer, {
-                text: urlTotem,
+                text: urlAtual,
                 width: 220,
                 height: 220,
                 colorDark: "#1e3a8a",
                 colorLight: "#ffffff"
             });
             
-            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
         }
 
         function fecharModalQR() {
-            document.getElementById('modalQR').style.display = 'none';
+            document.getElementById('modalQR').classList.add('hidden');
         }
 
-        // FUNÇÃO PRINCIPAL - GERAR SENHA
+        // ========== FUNÇÃO PRINCIPAL ==========
         function gerarSenha() {
             const nomeInput = document.getElementById('nome');
             const cpfInput = document.getElementById('cpf');
             
+            // Validação
             if(!nomeInput.value.trim()) {
                 alert("Por favor, digite seu nome.");
                 return;
@@ -128,6 +124,7 @@
             let senha = prefixo + String(contador).padStart(3, '0');
             let sala = Math.random() < 0.5 ? "SALA 1" : "SALA 2";
             let timestamp = Date.now();
+            let horaAtual = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
             // Salva no localStorage do TOTEM
             localStorage.setItem("sest_contador", contador);
@@ -138,33 +135,30 @@
             // Histórico local
             let historico = JSON.parse(localStorage.getItem("sest_historico") || "[]");
             historico.unshift({ 
-                nome: nomeInput.value, 
-                cpf: cpfInput.value || "000.000.000-00",
+                nome: nomeInput.value.trim(), 
+                cpf: cpfInput.value.trim() || "000.000.000-00",
                 senha: senha, 
                 sala: sala, 
-                hora: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+                hora: horaAtual
             });
             localStorage.setItem("sest_historico", JSON.stringify(historico.slice(0, 10)));
 
-            // ===== PARTE IMPORTANTE: ENVIAR PARA O PAINEL =====
-            // Abre o site da gestão em segundo plano com os parâmetros na URL
-            const urlGestao = `https://SEUUSUARIO.github.io/sest-senat-gestao/Painel%20digital.html?senha=${senha}&nome=${encodeURIComponent(nomeInput.value)}&sala=${sala}&timestamp=${timestamp}`;
+            // ===== ENVIA PARA O PAINEL =====
+            // SUBSTITUA 'SEUUSUARIO' pelo seu nome do GitHub
+            const urlGestao = `https://isaacfirmino.github.io/sest-senat-gestao/Painel%20digital.html?senha=${senha}&nome=${encodeURIComponent(nomeInput.value.trim())}&sala=${sala}&timestamp=${timestamp}`;
             
-            // Tenta abrir em uma nova janela (pode ser bloqueado)
-            const janelaPainel = window.open(urlGestao, '_blank');
+            console.log("Abrindo URL do painel:", urlGestao);
             
-            // Se não abrir, avisa o usuário
-            if (!janelaPainel) {
-                console.log('Abra esta URL manualmente no painel:', urlGestao);
-            }
+            // Tenta abrir em uma nova aba (funciona no celular se não bloquear)
+            window.open(urlGestao, '_blank');
 
             // Mostra modal de sucesso
             document.getElementById('senhaDisplay').innerText = senha;
-            document.getElementById('modalSenha').style.display = 'flex';
+            document.getElementById('modalSenha').classList.remove('hidden');
 
             // Limpa formulário após 4 segundos
             setTimeout(() => {
-                document.getElementById('modalSenha').style.display = 'none';
+                document.getElementById('modalSenha').classList.add('hidden');
                 nomeInput.value = "";
                 cpfInput.value = "";
             }, 4000);
